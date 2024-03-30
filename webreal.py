@@ -144,6 +144,7 @@ def main():
     else:
         colornumber=3
     ph1 = st.slider('請選擇畫質', min_value=1, max_value=500, value=100)
+    modelname = st.text_input('請輸入想要的模型名稱')
     a=0
     lab123=[]
     for i in range(cate):
@@ -160,36 +161,39 @@ def main():
 
     if   len(lab)  <cate:
         st.warning("請上傳圖片以建立模型")
-    else:
+    elif all_images:
         z = st.slider('請選擇訓練次數', min_value=1, max_value=30, value=1)
         if st.button('開始訓練'):
+            if os.path.exists(f'{modelname}.keras'):
+                os.remove(f'{modelname}.keras')
+            if os.path.exists(f'{modelname}.h5'):
+                os.remove(f'{modelname}.h5')
             st.write("訓練已開始，請不要做任何操作以避免訓練中斷")
             trained_model = make(colornumber,all_images,all_labels,cate,z,ph1)
-            trained_model.save('model.h5')
-            trained_model.save('model123.keras')
-    if os.path.exists('model.h5') or os.path.exists('model123.keras'):
+            trained_model.save(f'{modelname}.h5')
+            trained_model.save(f'{modelname}.keras')
+    if os.path.exists(f'{modelname}.h5') or os.path.exists(f'{modelname}.keras'):
         if st.button('刪除模型重新建立'):
-            for i in range(10):
-                if os.path.exists('model123.keras'):
-                    os.remove('model123.keras')
-                if os.path.exists('model.h5'):
-                    os.remove('model.h5')
+            if os.path.exists(f'{modelname}.keras'):
+                os.remove(f'{modelname}.keras')
+            if os.path.exists(f'{modelname}.h5'):
+                os.remove(f'{modelname}.h5')
             st.success('已刪除')
             st.info('請再操作一遍，建立新模型')
     
-    if os.path.exists('model.h5'):
-        with open('model.h5','rb') as model_file:
+    if os.path.exists(f'{modelname}.h5'):
+        with open(f'{modelname}.h5','rb') as model_file:
             model_binary = model_file.read()
-        download_button = st.download_button(label="下載模型文件", data=model_binary, file_name="trained_model.h5", mime="application/octet-stream")
+        download_button = st.download_button(label="下載模型文件", data=model_binary, file_name=f'{modelname}.h5', mime="application/octet-stream")
         if download_button:
             st.success("文件已開始下載")
     result=[]
 
-    if os.path.exists('model123.keras'):
+    if os.path.exists(f'{modelname}.keras'):
         imgs1 = st.file_uploader("使用模型", type=["jpg", "png"], accept_multiple_files=True)
     #if imgs1:  是當imgs1不為空串列時==True
         if imgs1:
-            model=load_model('model123.keras')
+            model=load_model(f'{modelname}.keras')
         for img in imgs1:
             img_pil = image.load_img(img, target_size=(ph1,ph1), color_mode=color)
             img_array = image.img_to_array(img_pil)
@@ -206,13 +210,13 @@ def main():
             from keras.preprocessing import image
             from tensorflow.keras.models import load_model
             model = load_model('你下載的模型的路徑(要含副檔名)')
-            v=image.load_img('你想辨識的照片的路徑(要含副檔名)',target_size=(你當時選的畫質,你當時選的畫質), color_mode='grayscale'或'rgb')#grayscale是黑白  rgb是彩色  
+            v=image.load_img('你想辨識的照片的路徑(要含副檔名)',target_size=(你當時選的畫質,你當時選的畫質), color_mode='grayscale或rgb')#grayscale是黑白  rgb是彩色  
 
             label=['你的第一類的名稱','你的第二類的名稱','你的第n類名稱']
             v=image.img_to_array(v)
 
             #是四維陣列要說第一個1是總比數一定要寫
-            v=v.reshape(1,你當時選的畫質,你當時選的畫質,1或3)#黑白用1   彩色用3
+            v=v.reshape(1,你當時選的畫質,你當時選的畫質,1or3)#黑白用1   彩色用3
 
 
             v =v.astype('float32') / 255.0
